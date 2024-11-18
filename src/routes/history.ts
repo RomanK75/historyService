@@ -2,23 +2,32 @@ import express from 'express';
 import * as db from '../db/index';
 import e from 'express';
 import { StockAction } from '../types/action';
- 
+
 const historyRouter = express.Router();
 
+const testConnection = async () => {
+  try {
+    const testResult = await db.query('SELECT NOW()');
+    console.log('Database connection test:', testResult);
+  } catch (err) {
+    console.log('Connection error:', err);
+  }
+};
+
 historyRouter.get('/history', async (req, res) => {
-  const { 
-    plu, 
-    shop_id, 
-    date_from, 
-    date_to, 
-    action, 
-    page = 1, 
-    limit = 10 
+  const {
+    plu,
+    shop_id,
+    date_from,
+    date_to,
+    action,
+    page = 1,
+    limit = 10,
   } = req.query;
 
   try {
     let query = `
-      SELECT * FROM action_history 
+      SELECT * FROM action_history
       WHERE 1=1
     `;
     const values = [];
@@ -54,39 +63,46 @@ historyRouter.get('/history', async (req, res) => {
       paramCount++;
     }
 
-    // Add pagination
+    // Get total count before adding pagination
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*)');
+    const totalCountResult = await db.query(countQuery, [...values]);
+
+    // Add pagination to the main query
     const offset = (Number(page) - 1) * Number(limit);
     query += ` ORDER BY timestamp DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     values.push(limit, offset);
-
-    // Get total count for pagination
-    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*)');
-    const totalCount = await db.query(countQuery, values);
-
-    // Get paginated results
+    console.log(query);
     const result = await db.query(query, values);
-
+    console.log(result.rows);
     res.json({
       data: result.rows,
       pagination: {
-        total: parseInt(totalCount.rows[0].count),
+        total: parseInt(totalCountResult.rows[0].count),
         page: Number(page),
-        limit: Number(limit)
-      }
+        limit: Number(limit),
+      },
     });
   } catch (error) {
+    console.error('Query error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 historyRouter.post('/history', async (req, res) => {
   console.log(req.body);
-  const { plu, shop_id, action, quantity, order_quantity, timestamp }: Partial<StockAction> = req.body;
-  
+  const {
+    plu,
+    shop_id,
+    action,
+    quantity,
+    order_quantity,
+    timestamp,
+  }: Partial<StockAction> = req.body;
+
   let queryFields = [];
   let queryValues = [];
   let paramCounter = 1;
-  
+
   // Dynamically build query based on provided fields
   if (plu) {
     queryFields.push('plu');

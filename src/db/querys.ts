@@ -1,9 +1,8 @@
 import exp from 'constants';
 import * as db from './index';
 
-
 function createHistoryTable() {
-  const query =  `
+  const query = `
   CREATE TABLE IF NOT EXISTS action_history (
     id SERIAL PRIMARY KEY,
     plu INTEGER,
@@ -12,11 +11,8 @@ function createHistoryTable() {
     quantity INTEGER,
     order_quantity INTEGER,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );`
-  db.query(query)  
-};
-
-
-export {
-  createHistoryTable
+  );`;
+  db.query(query);
 }
+
+export { createHistoryTable };

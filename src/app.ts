@@ -1,8 +1,7 @@
 import { LogLevel } from './../node_modules/esbuild/lib/main.d';
 import express, { Request, Response } from 'express';
-import {createProxyMiddleware} from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import 'dotenv/config';
-
 
 import historyRouter from './routes/history';
 
@@ -10,12 +9,11 @@ import bodyParser from 'body-parser';
 
 import { createHistoryTable } from './db/querys';
 
-
 const apiProxy = createProxyMiddleware({
   target: String(process.env.PROXY_URL),
   changeOrigin: true,
   pathRewrite: {
-      '^/api': '',
+    '^/api': '',
   },
 });
 
@@ -29,6 +27,5 @@ app.use('/api', historyRouter);
 app.use('/api', apiProxy);
 
 createHistoryTable();
-
 
 export default app;
