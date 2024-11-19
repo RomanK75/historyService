@@ -1,5 +1,4 @@
-import { LogLevel } from './../node_modules/esbuild/lib/main.d';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import 'dotenv/config';
 

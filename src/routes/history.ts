@@ -1,6 +1,5 @@
 import express from 'express';
 import * as db from '../db/index';
-import e from 'express';
 import { StockAction } from '../types/action';
 
 const historyRouter = express.Router();
@@ -8,10 +7,7 @@ const historyRouter = express.Router();
 const testConnection = async () => {
   try {
     const testResult = await db.query('SELECT NOW()');
-    console.log('Database connection test:', testResult);
-  } catch (err) {
-    console.log('Connection error:', err);
-  }
+  } catch (err) {}
 };
 
 historyRouter.get('/history', async (req, res) => {
@@ -71,9 +67,9 @@ historyRouter.get('/history', async (req, res) => {
     const offset = (Number(page) - 1) * Number(limit);
     query += ` ORDER BY timestamp DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     values.push(limit, offset);
-    console.log(query);
+
     const result = await db.query(query, values);
-    console.log(result.rows);
+
     res.json({
       data: result.rows,
       pagination: {
@@ -89,7 +85,6 @@ historyRouter.get('/history', async (req, res) => {
 });
 
 historyRouter.post('/history', async (req, res) => {
-  console.log(req.body);
   const {
     plu,
     shop_id,
@@ -103,7 +98,7 @@ historyRouter.post('/history', async (req, res) => {
   let queryValues = [];
   let paramCounter = 1;
 
-  // Dynamically build query based on provided fields
+
   if (plu) {
     queryFields.push('plu');
     queryValues.push(plu);
@@ -138,7 +133,6 @@ historyRouter.post('/history', async (req, res) => {
 
   try {
     const result = await db.query(query, queryValues);
-    console.log(result.rows[0]);
     res.json({ data: result.rows[0] });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
